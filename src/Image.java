@@ -71,5 +71,19 @@ public class Image {
         //guardarImagen(ima, "escalaGris");
     }
 
+    // Se usan dos matrices porque no se puede trabajar con la imagen original.
+    // Se binariza la imagen 0 y 1
+    public void binarizar(){
+        //recorremos la matriz ima
+        for (int y = 0; y < columna; y++) {
+            for (int x = 0; x < fila; x++) {
+                if(ima[x][y] <= 128){
+                    auxi[x][y] = 0;
+                }else{
+                    auxi[x][y] = 255;
+                }
+            }
+        }
+    }
     
 }
