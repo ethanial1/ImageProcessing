@@ -85,5 +85,31 @@ public class Image {
             }
         }
     }
+
+    // Aplicar negativo a una imagen
+    public void negativo(){
+        BufferedImage negativo = new BufferedImage(fila, columna, BufferedImage.TYPE_INT_BGR);
+        int q = 255, r,g,b;
+        // Recorremos la matriz con la imagen 
+        for (int i = 0; i < columna; i++) {
+            for (int j = 0; j < fila; j++) {
+                colorAux = new Color(image.getRGB(j, i));
+                //auxi [j][i] = ((255 - colorAux.getRed()) + (255 - colorAux.getGreen()) + (255 - colorAux.getBlue()));
+                r = colorAux.getRed();
+                g = colorAux.getGreen();
+                b = colorAux.getBlue();
+                
+                negativo.setRGB(j, i, new Color(q-r,q-g,q-b).getRGB());
+            }
+        }
+        
+        try{
+            ImageIO.write(negativo, "jpg", new File("/Users/ethan/NetBeansProjects/ProgramaBase/src/programabase/"+"negativoImagen.jpg"));
+            System.err.print("Imagen creada");
+            
+        }catch(Exception e){
+            System.err.print(e);
+        }
+    }
     
 }
