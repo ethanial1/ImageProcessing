@@ -112,4 +112,44 @@ public class Image {
         }
     }
     
+     // Ecualizar imagen
+     public void ecualizarImagen(){
+        int imagenEcualizada[][] = ima;
+        double L = 255, m = 0.5;
+        
+        for (int i = 0; i < columna; i++) {
+            for (int j = 0; j < fila; j++) {
+                imagenEcualizada[j][i] =(int)((Math.pow(L, (1 - m))) * (Math.pow(imagenEcualizada[j][i], m)));
+              
+            }
+        }
+        
+        guardarImagen(imagenEcualizada, "ImagenEcualizada1");
+        
+    }
+
+    //Guardar imagen
+    private void guardarImagen(int ima[][], String nombre){
+        Color color_c;
+        BufferedImage imagenResult = new BufferedImage(fila, columna, BufferedImage.TYPE_INT_BGR);
+        
+        // recorremos toda la matriz para crear la imagen
+        for (int y = 0; y < columna; y++) {
+            for (int x = 0; x < fila; x++) {
+                color_c = new Color(ima[x][y], ima[x][y], ima[x][y]); // a cada canal le pasamos el número que tiene nuestra matriz.
+                
+                imagenResult.setRGB(x, y, color_c.getRGB());
+            }
+        }
+        
+        try{
+            
+            ///Users/ethan/NetBeansProjects/BaseProgram/src/baseprogram/
+            ImageIO.write(imagenResult, "jpg", new File("/Users/ethan/NetBeansProjects/BaseProgram/src/baseprogram/"+nombre+".jpg"));
+            System.err.print("Imagen creada");
+            
+        }catch(Exception e){
+            System.err.print(e);
+        }
+    }
 }
