@@ -7,6 +7,17 @@ import java.io.FileInputStream; // Obtiene información de un archivo, entradas 
 import java.io.IOException; // Sirve para capturas las excepciones al tratar de abrir o guardar en un archivo.
 import java.io.InputStream;
 import javax.imageio.stream.ImageInputStream;
+import javax.swing.BorderFactory;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.renderer.category.BarRenderer;
+import org.jfree.data.category.DefaultCategoryDataset;
+
 
 /**
  * @author ethan
@@ -17,17 +28,19 @@ public class Image {
     private Color color, colorAux;
     private int ima[][], auxi[][]; // serán del tamaño de la imagen que indican la fila y columna.
     
-    int minimo = 0, maximo = 255; // Niveles de intensidad.
-    InputStream input;
-    ImageInputStream imagen1;
+    private int minimo = 0, maximo = 255; // Niveles de intensidad.
+    private InputStream input;
+    private ImageInputStream imagen1;
     
-    BufferedImage image;
+    private BufferedImage image;
+
+    private String path = "/Users/ethan/John/Java/BaseProgram/src/assets/";
 
     // Método para obtener la matriz de la imagen
     public void matrizDatos(){
         try{
             // Creamos el objeto input, contiene la ruta de la imagen
-            input = new FileInputStream("/Users/ethan/NetBeansProjects/BaseProgram/src/baseprogram/car.jpg");
+            input = new FileInputStream(path+"car.jpg");
             imagen1 = ImageIO.createImageInputStream(input); // objeto que abre el archivo
             
             image = ImageIO.read(imagen1); // La podremos manipular
@@ -150,6 +163,109 @@ public class Image {
             
         }catch(Exception e){
             System.err.print(e);
+        }
+    }
+
+    // -------- Histograma de la imagen
+    //calcularmedia
+    private int calcularMedia(Color color){
+        int mediaColor;
+        mediaColor = (int)((color.getRed() + color.getGreen() + color.getBlue()) / 3);
+        return mediaColor;
+    }
+
+    //Histograma
+    private int[][] histograma(){
+        Color colorAux;
+        int histogramaReturn[][] = new int[5][256];
+
+        // Recorremos con ayuda de dos ciclos 
+        for (int i = 0; i < columna; i++) {
+            for (int j = 0; j < fila; j++) {
+                // Obtenemos el color del pixel actual
+                colorAux = new Color(ima[j][i],ima[j][i],ima[j][i]);
+                histogramaReturn[0][colorAux.getRed()] += 1;
+                histogramaReturn[1][colorAux.getGreen()] += 1;
+                histogramaReturn[2][colorAux.getBlue()] += 1;
+                histogramaReturn[3][colorAux.getAlpha()] += 1;
+                histogramaReturn[4][calcularMedia(colorAux)] += 1;
+            }
+        }
+
+        return histogramaReturn;
+    }
+
+    // Dibujar histograma
+    private void crearHistograma(int[] histograma, Color colorBarras, String nombre, int op){
+        // Creamos el dataset y añadimos el histograma
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        for (int i = 0; i < histograma.length; i++) {
+            dataset.addValue(histograma[i], "Número de píxeles", ""+i);
+        }
+
+        // Creamos el chart
+        JFreeChart chart = ChartFactory.createBarChart(nombre,null, null, dataset, PlotOrientation.VERTICAL, true, true, false);
+
+        // Modificamos el diseño del chart
+        CategoryPlot plot = (CategoryPlot) chart.getPlot();
+        BarRenderer renderer = (BarRenderer) plot.getRenderer();
+        renderer.setSeriesPaint(0, colorBarras);
+        chart.setAntiAlias(true);
+        chart.setBackgroundPaint(new Color(214,217,223));
+        ChartPanel chartPanel = new ChartPanel(chart);
+        chartPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4), BorderFactory.createLineBorder(Color.black)));
+        
+        // Guardamos los histogramas
+        try {
+            switch (op) {
+                case 0:
+                    ChartUtilities.saveChartAsPNG(new File(path+"salidaRojo.png"), chart, 600, 600);
+                    break;
+                case 1:
+                    ChartUtilities.saveChartAsPNG(new File(path+"salidaVerde.png"), chart, 600, 600);
+                    break;
+                case 2:
+                    ChartUtilities.saveChartAsPNG(new File(path+"salidaAzul.png"), chart, 600, 600);
+                    break;
+                case 3:
+                    ChartUtilities.saveChartAsPNG(new File(path+"salida4.png"), chart, 600, 600);
+                    break;
+                case 4:
+                    ChartUtilities.saveChartAsPNG(new File(path+"salida5.png"), chart, 600, 600);
+                    break;
+                default:
+                    break;
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
+    // Crear Histograma
+    public void generarHistograma(){
+        int[][] histo =  histograma();
+        int[] histoCanal = new int[256];
+        for (int i = 0; i < 5; i++) {
+            System.arraycopy(histo[i], 0, histoCanal, 0, histo[i].length);
+            switch (i) {
+                case 0:
+                    crearHistograma(histoCanal, Color.red, "Color Rojo",0);
+                    break;
+                case 1:
+                    crearHistograma(histoCanal, Color.green, "Color Verde",1);
+                    break;
+                case 2:
+                    crearHistograma(histoCanal, Color.blue, "Color Azul",2);
+                    break;
+                case 3:
+                    crearHistograma(histoCanal, Color.black, "Color Alpha",3);
+                    break;
+                case 4:
+                    crearHistograma(histoCanal, Color.gray, "Color Gris",4);
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }

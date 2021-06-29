@@ -1,5 +1,9 @@
+import java.awt.Color;
+
 public class App {
     public static void main(String[] args) throws Exception {
-        System.out.println("Hello, World!");
+        Image image = new Image();
+        image.matrizDatos();
+        image.generarHistograma();
     }
 }
