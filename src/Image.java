@@ -57,9 +57,6 @@ public class Image {
             System.err.println(fila);
             System.err.println(columna);
             
-            // Llamamos al método Escala de grisies
-            escalaGris();
-            
         }catch(IOException e){
             System.err.println(e);
         }
@@ -76,12 +73,14 @@ public class Image {
                 color = new Color(pixel); // regresa un color mediante un valor
                     
                 // generamos/llenamos la matriz
-                ima[y][x] = (color.getRed() + color.getGreen() + color.getBlue()) / 3;
+                auxi[y][x] = (color.getRed() + color.getGreen() + color.getBlue()) / 3;
             }
         }
         
         // Guardamos la imagen
         //guardarImagen(ima, "escalaGris");
+        // Creamos el histograma de la imagen a escala de grises
+        generarHistograma(auxi);
     }
 
     // Se usan dos matrices porque no se puede trabajar con la imagen original.
@@ -175,7 +174,7 @@ public class Image {
     }
 
     //Histograma
-    private int[][] histograma(){
+    private int[][] histograma(int[][] imagen){
         Color colorAux;
         int histogramaReturn[][] = new int[5][256];
 
@@ -183,7 +182,7 @@ public class Image {
         for (int i = 0; i < columna; i++) {
             for (int j = 0; j < fila; j++) {
                 // Obtenemos el color del pixel actual
-                colorAux = new Color(ima[j][i],ima[j][i],ima[j][i]);
+                colorAux = new Color(imagen[j][i],imagen[j][i],imagen[j][i]);
                 histogramaReturn[0][colorAux.getRed()] += 1;
                 histogramaReturn[1][colorAux.getGreen()] += 1;
                 histogramaReturn[2][colorAux.getBlue()] += 1;
@@ -242,8 +241,8 @@ public class Image {
     }
 
     // Crear Histograma
-    public void generarHistograma(){
-        int[][] histo =  histograma();
+    public void generarHistograma(int imagen[][]){
+        int[][] histo =  histograma(imagen);
         int[] histoCanal = new int[256];
         for (int i = 0; i < 5; i++) {
             System.arraycopy(histo[i], 0, histoCanal, 0, histo[i].length);
