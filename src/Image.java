@@ -28,7 +28,7 @@ public class Image {
     private Color color, colorAux;
     private int ima[][], auxi[][]; // serán del tamaño de la imagen que indican la fila y columna.
     
-    private int minimo = 0, maximo = 255; // Niveles de intensidad.
+    //private int minimo = 0, maximo = 255; // Niveles de intensidad.
     private InputStream input;
     private ImageInputStream imagen1;
     
@@ -80,7 +80,7 @@ public class Image {
         // Guardamos la imagen
         //guardarImagen(ima, "escalaGris");
         // Creamos el histograma de la imagen a escala de grises
-        generarHistograma(auxi);
+        //generarHistograma(auxi);
     }
 
     // Se usan dos matrices porque no se puede trabajar con la imagen original.
@@ -124,19 +124,26 @@ public class Image {
         }
     }
     
-     // Ecualizar imagen
-     public void ecualizarImagen(){
-        int imagenEcualizada[][] = ima;
+    // Ecualizar imagen
+    public void ecualizarImagen(){
+        // matriz sobre la que trabajamos
+        int imagenEcualizada[][] = auxi;
+        // L = nivel máximo de intensidad
+        // m = 2 : cuadrática
+        // m = 3 : cúbica
+        // m = 1/2 = 0.5 : raíz cuadrada
+        // m = 1/3 = 0.33 : raíz cúbica.
         double L = 255, m = 0.5;
         
+        // Recorremos la matriz 
         for (int i = 0; i < columna; i++) {
             for (int j = 0; j < fila; j++) {
                 imagenEcualizada[j][i] =(int)((Math.pow(L, (1 - m))) * (Math.pow(imagenEcualizada[j][i], m)));
               
             }
         }
-        
-        guardarImagen(imagenEcualizada, "ImagenEcualizada1");
+        // Llamamos al metodoa para guardar la imagen
+        guardarImagen(imagenEcualizada, "ImagenEcualizada2");
         
     }
 
@@ -157,7 +164,7 @@ public class Image {
         try{
             
             ///Users/ethan/NetBeansProjects/BaseProgram/src/baseprogram/
-            ImageIO.write(imagenResult, "jpg", new File("/Users/ethan/NetBeansProjects/BaseProgram/src/baseprogram/"+nombre+".jpg"));
+            ImageIO.write(imagenResult, "jpg", new File(path+nombre+".jpg"));
             System.err.print("Imagen creada");
             
         }catch(Exception e){
