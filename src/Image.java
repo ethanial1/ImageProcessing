@@ -10,6 +10,7 @@ import javax.imageio.stream.ImageInputStream;
 import javax.swing.BorderFactory;
 
 import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartFrame;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
@@ -81,6 +82,7 @@ public class Image {
         //guardarImagen(ima, "escalaGris");
         // Creamos el histograma de la imagen a escala de grises
         //generarHistograma(auxi);
+        //histogramaEcualizado(auxi, "Niveles de gris");
     }
 
     // Se usan dos matrices porque no se puede trabajar con la imagen original.
@@ -124,8 +126,8 @@ public class Image {
         }
     }
     
-    // Ecualizar imagen
-    public void ecualizarImagen(){
+    // Modificar el brillo y contraste de una imagen, como consecuencia se  modifica el histograma
+    public void modificarBrilloContraste(){
         // matriz sobre la que trabajamos
         int imagenEcualizada[][] = auxi;
         // L = nivel máximo de intensidad
@@ -145,6 +147,61 @@ public class Image {
         // Llamamos al metodoa para guardar la imagen
         guardarImagen(imagenEcualizada, "ImagenEcualizada2");
         
+    }
+
+    // Ecualizar el histograma
+    public void ecualizarHistograma(){
+        int niveles[];
+        int imagenAuxi[][] = auxi; 
+
+        //Obtener las intensidades
+        niveles = obtenerIntensidades(imagenAuxi);
+        
+        // Recorremos el arreglo de intensidades 
+        for (int i = 0; i < niveles.length; i++) {
+            System.out.println("Nivel "+i+" = "+niveles[i]);
+        }
+    }
+
+    // Creación del histograma
+    // obtención de intensidades
+    private int[] obtenerIntensidades(int imagenEcualizada[][]){
+        int intensidadVecotor[] = new int[256];
+        int intensidad;
+        for (int y = 0; y < columna; y++) {
+            for (int x = 0; x < fila; x++) {
+                intensidad = imagenEcualizada[x][y];
+                intensidadVecotor[intensidad]++;
+            }
+        }
+
+        return intensidadVecotor;
+    }
+    
+    //Grafica del histograma
+    private void histogramaEcualizado(int imagenEcualizada[][], String titulo){
+        int insidadesEcualizadas[] = new int[256];
+
+        // Obtenemos el nivel de intensidad
+        insidadesEcualizadas = obtenerIntensidades(imagenEcualizada);
+
+        // Graficamos
+        try {
+            DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+
+            for (int i = 0; i < insidadesEcualizadas.length; i++) {
+                dataset.addValue(insidadesEcualizadas[i], "Intensidades", ""+i);
+            }
+
+            JFreeChart histogram = ChartFactory.createBarChart(titulo, "Niveles de intensidad", "Pixeles", dataset ,PlotOrientation.VERTICAL, false, true, false);
+
+            ChartFrame ventana = new ChartFrame(titulo, histogram);
+
+            ventana.setSize(1000, 500);
+            ventana.setVisible(true);
+        } catch (Exception e) {
+            System.out.println(e);
+        }
     }
 
     //Guardar imagen
@@ -172,7 +229,11 @@ public class Image {
         }
     }
 
-    // -------- Histograma de la imagen
+
+
+
+
+    // -------- Obtención del Histograma en base al Rojo, Vender y Azul
     //calcularmedia
     private int calcularMedia(Color color){
         int mediaColor;
