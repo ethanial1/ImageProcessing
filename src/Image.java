@@ -6,6 +6,8 @@ import java.io.File; // Sirve para trabajar con archivos de imagen.
 import java.io.FileInputStream; // Obtiene información de un archivo, entradas de información a partir de un archivo.
 import java.io.IOException; // Sirve para capturas las excepciones al tratar de abrir o guardar en un archivo.
 import java.io.InputStream;
+//import java.text.DecimalFormat;
+
 import javax.imageio.stream.ImageInputStream;
 import javax.swing.BorderFactory;
 
@@ -41,7 +43,7 @@ public class Image {
     public void matrizDatos(){
         try{
             // Creamos el objeto input, contiene la ruta de la imagen
-            input = new FileInputStream(path+"car.jpg");
+            input = new FileInputStream(path+"king.jpg");
             imagen1 = ImageIO.createImageInputStream(input); // objeto que abre el archivo
             
             image = ImageIO.read(imagen1); // La podremos manipular
@@ -55,8 +57,8 @@ public class Image {
             ima = new int[fila][columna];
             auxi = new int[fila][columna]; // matriz sobre la que se trabaja.
             
-            System.err.println(fila);
-            System.err.println(columna);
+            System.err.println("Número de filas: "+fila);
+            System.err.println("Número de columnas"+columna);
             
         }catch(IOException e){
             System.err.println(e);
@@ -79,7 +81,7 @@ public class Image {
         }
         
         // Guardamos la imagen
-        //guardarImagen(ima, "escalaGris");
+        //guardarImagen(auxi, "escalaGris");
         // Creamos el histograma de la imagen a escala de grises
         //generarHistograma(auxi);
         //histogramaEcualizado(auxi, "Niveles de gris");
@@ -151,16 +153,46 @@ public class Image {
 
     // Ecualizar el histograma
     public void ecualizarHistograma(){
-        int niveles[];
-        int imagenAuxi[][] = auxi; 
+        int niveles[]; // se guarda el número de píxeles por cada nivel de intensiada
+        int imagenAuxi[][] = auxi; // Matríz que es igual a la matríz auxiliar
+        int intensidades[] = new int[256]; // Nuevas intensidades (S)
+        int nuevaImagen[][] = new int[fila][columna]; // Nueva matriz para guardar la nueva imagen
+        int L; // Número de niveles de intensidad
+
+        // Multiplicación
+        int total = fila * columna;
+
+        // Indicamos que solo obtenemos 3 cífras despues del punto decimal
+        //DecimalFormat formatter = new DecimalFormat("#.####");
 
         //Obtener las intensidades
         niveles = obtenerIntensidades(imagenAuxi);
-        
+
+        // Definosmos el número de los niveles de intensidad
+        L = niveles.length;
+
+        double temporal = 0, result, temp;
+
         // Recorremos el arreglo de intensidades 
-        for (int i = 0; i < niveles.length; i++) {
-            System.out.println("Nivel "+i+" = "+niveles[i]);
+        for (int i = 0; i < L; i++) {
+            //Se realiza la división de :    Nk / MN 
+            result = (double) niveles[i] / total;
+            // multiplicamos el valor 
+            temp = (double) (L-1) * result;
+            intensidades[i] = (int) Math.floor(temp + temporal);
+            temporal = result;
         }
+
+        
+        // Crear la nueva imagen
+        for (int y = 0; y < fila; y++) {
+            for (int x = 0; x < columna; x++) {
+                nuevaImagen[x][y] = intensidades[imagenAuxi[x][y]];
+            }
+        }
+
+        //guardarImagen(nuevaImagen, "NuevaImagenEcualizada");
+        histogramaEcualizado(nuevaImagen, "Ecualizado");
     }
 
     // Creación del histograma
