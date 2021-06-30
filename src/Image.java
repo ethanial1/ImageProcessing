@@ -43,7 +43,7 @@ public class Image {
     public void matrizDatos(){
         try{
             // Creamos el objeto input, contiene la ruta de la imagen
-            input = new FileInputStream(path+"king.jpg");
+            input = new FileInputStream(path+"car.jpg");
             imagen1 = ImageIO.createImageInputStream(input); // objeto que abre el archivo
             
             image = ImageIO.read(imagen1); // La podremos manipular
@@ -81,7 +81,7 @@ public class Image {
         }
         
         // Guardamos la imagen
-        //guardarImagen(auxi, "escalaGris");
+        guardarImagen(auxi, "escalaGris");
         // Creamos el histograma de la imagen a escala de grises
         //generarHistograma(auxi);
         //histogramaEcualizado(auxi, "Niveles de gris");
@@ -154,7 +154,7 @@ public class Image {
     // Ecualizar el histograma
     public void ecualizarHistograma(){
         int niveles[]; // se guarda el número de píxeles por cada nivel de intensiada
-        int imagenAuxi[][] = auxi; // Matríz que es igual a la matríz auxiliar
+        int imagenAuxi[][] = ima; // Matríz que es igual a la matríz auxiliar
         int intensidades[] = new int[256]; // Nuevas intensidades (S)
         int nuevaImagen[][] = new int[fila][columna]; // Nueva matriz para guardar la nueva imagen
         int L; // Número de niveles de intensidad
@@ -169,7 +169,7 @@ public class Image {
         niveles = obtenerIntensidades(imagenAuxi);
 
         // Definosmos el número de los niveles de intensidad
-        L = niveles.length;
+        L = 255;
 
         double temporal = 0, result, temp;
 
@@ -187,13 +187,109 @@ public class Image {
         // Crear la nueva imagen
         for (int y = 0; y < fila; y++) {
             for (int x = 0; x < columna; x++) {
-                nuevaImagen[x][y] = intensidades[imagenAuxi[x][y]];
+                nuevaImagen[y][x] = intensidades[imagenAuxi[y][x]];
             }
         }
 
         //guardarImagen(nuevaImagen, "NuevaImagenEcualizada");
         histogramaEcualizado(nuevaImagen, "Ecualizado");
     }
+
+    // Aplicación de Filtros de imagen
+    /*
+        Se trabaja sobre una copia de la imagen, debido a que se tiene que tener una referencia de los píxeles vecinos
+        cuando se modifica un píxel
+        ##  CONCEPTOS
+
+        Combolución en el Dominio Espacial  =   Es la operación de una imagen un filtrado.
+        Filtro espacial                     =   es la operación que se aplica a una imagen para resaltar o atenuar detalles espaciales
+                                                con el fin de mejorar la interpretación visual.
+        Frecuencia Espacial                 =   La frecuencia espacial define la magnitud de cambios en el nivel de gris por unidad de 
+                                                distancia en una determinada zona de la imagen.
+        Áreas de baja frecuencia            =   áreas de la imagen con pequeños cambios o con transiciones graduales en los valores.
+        Áreas de alta frecuencia            =   Las áreas de grandes cambios o rápidas transiciones se conocen como áreas de altas frecuencias.
+
+        ## Categoría de los filtros espaciales
+        Filtro pasa bajas:
+        Filtro pasa altas:
+
+        Filtro espacial                     :   Se realiza trasladando una matriz rectangular de dos dimensiones (también llamada ventana, kernel, máscara o núcleo) 
+                                                que contiene "pesos" o ponderaciones sobre la imagen en cada localización de píxel.
+        Pesos                               =   Valores que puede tener el filtro.
+        Máscara                             =   Matríz de coeficientes
+    */
+    // Filto de la media
+    public void filtro(){
+        int mascara[][] = {{1,1,1},{1,1,1},{1,1,1}};
+        int tope = mascara.length/2;
+        int imagen[][] = auxi;
+        int copia[][] = new int[fila+1][columna+1];
+        int nueva[][] = new int[fila+2][columna+2];
+        
+        // Añadir un margen de 0 en las filas y columnas
+        
+        for (int i = 0; i < nueva.length; i++) {
+            for (int j = 0; j < nueva[i].length; j++) {
+                if(i == 0 || i == nueva.length-1 || j == 0 || j == nueva[i].length-1){
+                    nueva[i][j] = 0;
+                }else{
+                    nueva[i][j] = imagen[i-1][j-1];
+                }
+            }
+        }
+        
+        // 
+        for (int i = tope; i < nueva.length-tope; i++) {
+            for (int j = tope; j < nueva[i].length-tope; j++) {
+                copia[i][j] = calcular(nueva, mascara, i, j);
+                //System.out.println(copia[i][j]);
+            }
+        }
+        
+        /*
+        for (int i = 0; i < copia.length; i++) {
+            for (int j = 0; j < copia[i].length; j++) {
+                System.out.print(copia[i][j]);
+            }
+            System.out.println("");
+        }*/
+        guardarImagen(copia, "Filtrado");
+    }
+
+    private int calcular(int[][] imagen, int mascara[][], int fila, int columna){
+        int tope = mascara.length/2;
+        int result = 0;
+        int factor = 0;
+
+        // Itersar en base a la mascara y la imagen
+        for (int i = 0; i < mascara.length; i++) {
+            for (int j = 0; j < mascara[0].length; j++) {
+                factor += mascara[i][j];
+                result += (int) (mascara[i][j] * imagen[fila-tope+i][columna-tope+j]);
+            }
+        }
+
+        if(factor > 0){
+            result /= factor;
+        }
+
+        return result;
+    }
+
+    /*
+    public static void llenaCeros(int[][] matriz) {
+        for (int i = 0; i < matriz.length; i++) { //fila 0
+            for (int j = 0; j < matriz[i].length; j++) {
+                if (i==0 || i == matriz.length-1 ||  j == 0 || j == matriz[i].length -1)
+                    matriz[i][j]=0;
+                System.out.print(matriz[i][j]+ " ");
+            }
+            System.out.println();
+        }
+    }
+    Actividad: Aplicar un laplaciano y un detector de bordes
+    */
+
 
     // Creación del histograma
     // obtención de intensidades

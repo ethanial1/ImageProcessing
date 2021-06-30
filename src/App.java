@@ -3,6 +3,8 @@ public class App {
         Image image = new Image();
         image.matrizDatos();
         image.escalaGris();
+        image.filtro();
+        //image.escalaGris();
         //image.ecualizarHistograma();
         //image.ecualizarImagen();
     }
