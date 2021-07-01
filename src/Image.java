@@ -7,6 +7,7 @@ import java.io.FileInputStream; // Obtiene información de un archivo, entradas 
 import java.io.IOException; // Sirve para capturas las excepciones al tratar de abrir o guardar en un archivo.
 import java.io.InputStream;
 //import java.text.DecimalFormat;
+import java.text.DecimalFormat;
 
 import javax.imageio.stream.ImageInputStream;
 import javax.swing.BorderFactory;
@@ -83,8 +84,7 @@ public class Image {
         // Guardamos la imagen
         guardarImagen(auxi, "escalaGris");
         // Creamos el histograma de la imagen a escala de grises
-        //generarHistograma(auxi);
-        //histogramaEcualizado(auxi, "Niveles de gris");
+        histogramaEcualizado(auxi, "Niveles de gris");
     }
 
     // Se usan dos matrices porque no se puede trabajar con la imagen original.
@@ -148,10 +148,11 @@ public class Image {
         }
         // Llamamos al metodoa para guardar la imagen
         guardarImagen(imagenEcualizada, "ImagenEcualizada2");
+        histogramaEcualizado(imagenEcualizada, "Imagen m = 2");
         
     }
 
-    // Ecualizar el histograma
+    // Ecualizar el histograma : Ethan
     public void ecualizarHistograma(){
         int niveles[]; // se guarda el número de píxeles por cada nivel de intensiada
         int imagenAuxi[][] = ima; // Matríz que es igual a la matríz auxiliar
@@ -195,6 +196,55 @@ public class Image {
         histogramaEcualizado(nuevaImagen, "Ecualizado");
     }
 
+    // 2da version de Ecualizar histograma
+    public void ecualizacionHistograma(){
+        int imagenEcualizada[][] = auxi;
+        int instensidades[];
+
+        int L = 255;
+        int inte = 0;
+        int result = fila * columna;
+        Color color;
+        int sk;
+
+        // Formato decimal
+        DecimalFormat format = new DecimalFormat("#.00");
+
+        //double nuevasIntensidades[] = new double[256];
+        //double intensidades2[] = new double[256];
+        double s[] = new double[256];
+        double redondear = 0, intensidad, resultadoMulti;
+
+        // Obtenemos las intensidades
+        instensidades = obtenerIntensidades(imagenEcualizada);
+
+        for (int i = 0; i < instensidades.length; i++) {
+            intensidad = Double.parseDouble(format.format(instensidades[i] / result));
+            resultadoMulti = Double.parseDouble(format.format(intensidad * L));
+            redondear = Math.round(redondear + resultadoMulti);
+            s[i] = redondear;
+        }
+
+
+        BufferedImage imagenResult = new BufferedImage(fila, columna, BufferedImage.TYPE_INT_BGR);
+        for (int x = 0; x < fila; x++) {
+            for (int y = 0; y < columna; y++) {
+                inte = imagenEcualizada[x][y];
+                instensidades[inte]++;
+                sk = (int)s[inte];
+                color = new Color(sk,sk,sk);
+                imagenResult.setRGB(x, y, color.getRGB());
+            }
+        }
+
+        // Guardamos la imagen
+        try {
+            ImageIO.write(imagenResult, "jpg", new File(path+"imagenEcualizada.jpg"));
+            System.err.println("Imagen creada en "+path);
+        } catch (Exception e) {
+            System.err.println(e);
+        }
+    }
     // Aplicación de Filtros de imagen
     /*
         Se trabaja sobre una copia de la imagen, debido a que se tiene que tener una referencia de los píxeles vecinos
@@ -219,15 +269,21 @@ public class Image {
         Máscara                             =   Matríz de coeficientes
     */
     // Filto de la media
-    public void filtro(){
-        int mascara[][] = {{1,1,1},{1,1,1},{1,1,1}};
+    // Método que contien todos los filtros
+    public void aplicarFiltro(){
+        int[][] media = {{1,1,1},{1,1,1},{1,1,1}};
+
+        // llamamos al método del filtro
+        filtro(media);
+    }
+    private void filtro(int[][] mascara){
+        //int mascara[][] = {{1,1,1},{1,1,1},{1,1,1}};
         int tope = mascara.length/2;
         int imagen[][] = auxi;
         int copia[][] = new int[fila+1][columna+1];
         int nueva[][] = new int[fila+2][columna+2];
         
         // Añadir un margen de 0 en las filas y columnas
-        
         for (int i = 0; i < nueva.length; i++) {
             for (int j = 0; j < nueva[i].length; j++) {
                 if(i == 0 || i == nueva.length-1 || j == 0 || j == nueva[i].length-1){
@@ -238,22 +294,17 @@ public class Image {
             }
         }
         
-        // 
+        // Recorremos la matriz en base a la máscara
         for (int i = tope; i < nueva.length-tope; i++) {
             for (int j = tope; j < nueva[i].length-tope; j++) {
                 copia[i][j] = calcular(nueva, mascara, i, j);
                 //System.out.println(copia[i][j]);
             }
         }
-        
-        /*
-        for (int i = 0; i < copia.length; i++) {
-            for (int j = 0; j < copia[i].length; j++) {
-                System.out.print(copia[i][j]);
-            }
-            System.out.println("");
-        }*/
+
+        // Guardamos la imagen
         guardarImagen(copia, "Filtrado");
+        histogramaEcualizado(copia, "Filtro: media");
     }
 
     private int calcular(int[][] imagen, int mascara[][], int fila, int columna){
@@ -275,21 +326,6 @@ public class Image {
 
         return result;
     }
-
-    /*
-    public static void llenaCeros(int[][] matriz) {
-        for (int i = 0; i < matriz.length; i++) { //fila 0
-            for (int j = 0; j < matriz[i].length; j++) {
-                if (i==0 || i == matriz.length-1 ||  j == 0 || j == matriz[i].length -1)
-                    matriz[i][j]=0;
-                System.out.print(matriz[i][j]+ " ");
-            }
-            System.out.println();
-        }
-    }
-    Actividad: Aplicar un laplaciano y un detector de bordes
-    */
-
 
     // Creación del histograma
     // obtención de intensidades
@@ -349,7 +385,7 @@ public class Image {
         try{
             
             ///Users/ethan/NetBeansProjects/BaseProgram/src/baseprogram/
-            ImageIO.write(imagenResult, "jpg", new File(path+nombre+".jpg"));
+            ImageIO.write(imagenResult, "jpeg", new File(path+nombre+".jpg"));
             System.err.print("Imagen creada");
             
         }catch(Exception e){
