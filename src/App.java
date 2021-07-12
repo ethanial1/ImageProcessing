@@ -4,6 +4,7 @@ public class App {
         image.matrizDatos();
         
         image.escalaGris();
+        
         //image.negativo();
         //image.Ecualizar();
         //image.modificarBrilloContraste();

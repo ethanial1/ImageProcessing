@@ -320,8 +320,15 @@ public class Image {
             contornos 
             Suavisado
         
-        Los pixeles de la nueva imagen, dependen de la imagen original y de sus vecinos.
+        Los pixeles de la nueva imagen, dependen de la imagen original y de sus vecinos, se desplaza, de izquierda a derecha y
+        de arriba hacia abajo.
 
+        El filtro: media = usa 1 en su máscara.
+        Padding     :   Es añadir margenes de 0 en la imagen (Filas y columnas)
+
+        Combolución                         =   Operación matemática que suma una función f consigo misma repetidas veces
+                                                en todo el dominio de otra función h, utilizando en cada suma como valor de escala
+                                                el valor de h en ese punto de su dominio.
         Combolución en el Dominio Espacial  =   Es la operación de una imagen un filtrado.
         Filtro espacial                     =   es la operación que se aplica a una imagen para resaltar o atenuar detalles espaciales
                                                 con el fin de mejorar la interpretación visual.
@@ -347,7 +354,11 @@ public class Image {
         // llamamos al método del filtro
         filtro(media);
     }
-    private void filtro(int[][] mascara){
+    
+    /** 
+    * @param mascara tipo de mascara
+    */
+    public void filtro(int[][] mascara){
         //int mascara[][] = {{1,1,1},{1,1,1},{1,1,1}};
         int tope = mascara.length/2;
         int imagen[][] = auxi;
