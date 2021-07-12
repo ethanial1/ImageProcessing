@@ -44,7 +44,7 @@ public class Image {
     public void matrizDatos(){
         try{
             // Creamos el objeto input, contiene la ruta de la imagen
-            input = new FileInputStream(path+"car.jpg");
+            input = new FileInputStream(path+"uno.jpg");
             imagen1 = ImageIO.createImageInputStream(input); // objeto que abre el archivo
             
             image = ImageIO.read(imagen1); // La podremos manipular
@@ -84,7 +84,7 @@ public class Image {
         // Guardamos la imagen
         guardarImagen(auxi, "escalaGris");
         // Creamos el histograma de la imagen a escala de grises
-        histogramaEcualizado(auxi, "Niveles de gris");
+        //histogramaEcualizado(auxi, "Niveles de gris");
     }
 
     // Se usan dos matrices porque no se puede trabajar con la imagen original.
@@ -109,18 +109,19 @@ public class Image {
         // Recorremos la matriz con la imagen 
         for (int i = 0; i < columna; i++) {
             for (int j = 0; j < fila; j++) {
-                colorAux = new Color(image.getRGB(j, i));
+                //colorAux = new Color(image.getRGB(j, i));
                 //auxi [j][i] = ((255 - colorAux.getRed()) + (255 - colorAux.getGreen()) + (255 - colorAux.getBlue()));
-                r = colorAux.getRed();
-                g = colorAux.getGreen();
-                b = colorAux.getBlue();
+                //r = colorAux.getRed();
+                //g = colorAux.getGreen();
+                //b = colorAux.getBlue();
                 
-                negativo.setRGB(j, i, new Color(q-r,q-g,q-b).getRGB());
+                //negativo.setRGB(j, i, new Color(q-r,q-g,q-b).getRGB());
+                negativo.setRGB(j, i, new Color(255-auxi[j][i],255-auxi[j][i],255-auxi[j][i]).getRGB());
             }
         }
         
         try{
-            ImageIO.write(negativo, "jpg", new File("/Users/ethan/NetBeansProjects/ProgramaBase/src/programabase/"+"negativoImagen.jpg"));
+            ImageIO.write(negativo, "jpg", new File(path+"negativoImagen.jpg"));
             System.err.print("Imagen creada");
             
         }catch(Exception e){
@@ -245,11 +246,81 @@ public class Image {
             System.err.println(e);
         }
     }
+    
+    /*
+    autor: Carlos vazquez
+    */
+    public void Ecualizar() {
+        int intensidad;
+        int ImagenEcualizada[][] = auxi;
+        int intensidades[] = new int[256];
+        int L = 256 - 1;
+        double nuevasintensidades[] = new double[256];
+
+        // Formato decimal
+        DecimalFormat F1 = new DecimalFormat("#.00");
+        double Intendidades2[] = new double[256];
+        double s[] = new double[256];
+        double redondear = 0;
+
+        // Obtenemos los niveles de intensidad
+        for (int x = 0; x < fila; x++) {
+            for (int y = 0; y < columna; y++) {
+                intensidad = ImagenEcualizada[x][y];                                 
+                intensidades[intensidad]++;                          
+            }
+        }
+
+        
+        for (int i = 0; i < intensidades.length; i++) {
+            Intendidades2[i] = intensidades[i];    
+            nuevasintensidades[i] = Double.parseDouble(F1.format(Intendidades2[i] / (fila * columna)));                                              
+            s[i] = Double.parseDouble(F1.format(nuevasintensidades[i] * L));
+            redondear = Math.round(redondear + s[i]);
+            s[i] = redondear;                     
+        }
+
+        // Creamos la imagen
+        Color color_n;
+        BufferedImage imag = new BufferedImage(fila, columna, BufferedImage.TYPE_INT_BGR);
+        for (int x = 0; x < fila; x++) {
+            for (int y = 0; y < columna; y++) {
+                intensidad = ImagenEcualizada[x][y];               
+                intensidades[intensidad]++;
+                int sk = (int) s[intensidad];    
+                color_n = new Color(sk, sk, sk);
+                imag.setRGB(x, y,color_n.getRGB());
+            }
+        }
+        try {
+        ImageIO.write(imag, "jpeg", new File(path + "imagenEcualizada.jpeg"));
+            System.err.println("Imagen Creada");
+
+        } catch (Exception e) {
+            System.err.println("Error");
+        }
+    }
+
     // Aplicación de Filtros de imagen
     /*
         Se trabaja sobre una copia de la imagen, debido a que se tiene que tener una referencia de los píxeles vecinos
         cuando se modifica un píxel
         ##  CONCEPTOS
+        Filtro                              =   Procesado en el dominio frecuencial, 
+        Pasa-bajas                          =   Suabizar la imagen, desenfoque
+        Pasa-altas                          =   Realza o mejora los bordes, los bordes tienen mayor cantidad de información.
+                                            Se puede hacer una combinación con el objetico de mejorar la calidad de la imagen.
+        
+        Los filtros espaciales son filtros que se realizan sobre la imagen y por lo tanto en el 
+        dominio espacial, es por eso que se llama d    
+        
+        Aplicaciones
+            Reduccion de ruido
+            Detección de bordes en una dirección, horizontal o vertical.
+            contornos 
+            Suavisado
+        
+        Los pixeles de la nueva imagen, dependen de la imagen original y de sus vecinos.
 
         Combolución en el Dominio Espacial  =   Es la operación de una imagen un filtrado.
         Filtro espacial                     =   es la operación que se aplica a una imagen para resaltar o atenuar detalles espaciales
